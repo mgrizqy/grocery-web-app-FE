@@ -10,9 +10,11 @@ import StatusBadge from "@/components/shared/StatusBadge";
 import { useAdminOrderDetailStore } from "@/store/admin-order-detail-store";
 import AdminActionCard from "./AdminActionCard";
 import PaymentProofCard from "./PaymentProofCard";
-import ItemsOrderedCard from "./ItemsOrderedCard";
-import CustomerShippingCard from "./CustomerShippingCard";
-import PaymentPricingCard from "./PaymentPricingCard";
+import SharedOrderItemsCard from "@/components/shared/order/SharedOrderItemsCard";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import SharedCustomerInfoCard from "@/components/shared/order/SharedCustomerInfoCard";
+import { ClipboardList, CreditCard } from "lucide-react";
+import SharedPricingDetails from "@/components/shared/order/SharedPricingDetails";
 
 export default function AdminOrderDetailClient({
   orderId,
@@ -32,6 +34,17 @@ export default function AdminOrderDetailClient({
     markAsRefunded,
   } = useAdminOrderDetailStore();
   const { token } = useAuthStore();
+
+  const pricingInfo = order
+    ? {
+        subtotal: order.pricing.subtotal,
+        shippingCost: order.pricing.cost,
+        discountAmount: order.pricing.discount,
+        totalPrice: order.pricing.total,
+        paymentMethod: order.payment.method,
+        paymentStatus: order.payment.status,
+      }
+    : null;
 
   useEffect(() => {
     if (isNaN(orderId)) {
@@ -84,16 +97,34 @@ export default function AdminOrderDetailClient({
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         <div className="lg:col-span-2 space-y-6">
-          <CustomerShippingCard
-            customer={order.customer}
-            shipping={order.shipping}
+          <SharedCustomerInfoCard
+            name={order.customer.name}
+            phone={order.customer.phone}
+            address={order.shipping.address}
+            variant="card"
           />
 
-          <ItemsOrderedCard items={order.items} />
+          <Card className="rounded-2xl shadow-lg shadow-gray-200/50 border-0">
+            <CardHeader className="flex flex-row items-center gap-3">
+              <ClipboardList className="w-5 h-5 text-gray-500" />
+              <CardTitle className="text-lg">Items Ordered</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <SharedOrderItemsCard items={order.items} />
+            </CardContent>
+          </Card>
         </div>
 
         <div className="lg:col-span-1 space-y-6 lg:sticky lg:top-6">
-          <PaymentPricingCard payment={order.payment} pricing={order.pricing} />
+          <Card className="rounded-2xl shadow-lg shadow-gray-200/50 border-0">
+            <CardHeader className="flex flex-row items-center gap-3">
+              <CreditCard className="w-5 h-5 text-gray-500" />
+              <CardTitle className="text-lg">Payment & Pricing</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {pricingInfo && <SharedPricingDetails pricing={pricingInfo} />}
+            </CardContent>
+          </Card>
 
           {order.payment.proofUrl && (
             <PaymentProofCard proofUrl={order.payment.proofUrl} />

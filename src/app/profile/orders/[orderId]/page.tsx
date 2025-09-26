@@ -19,10 +19,12 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import OrderDetailHeader from "./components/OrderDetailHeader";
-import OrderShippingInfo from "./components/OrderShippingInfo";
-import OrderItemsInfo from "./components/OrderItemsInfo";
-import OrderPricingInfo from "./components/OrderPricingInfo";
 import { Card, CardContent } from "@/components/ui/card";
+import SharedOrderItemsCard from "@/components/shared/order/SharedOrderItemsCard";
+import { ClipboardList, CreditCard } from "lucide-react";
+import SharedPricingDetails from "@/components/shared/order/SharedPricingDetails";
+import SharedCustomerInfoCard from "@/components/shared/order/SharedCustomerInfoCard";
+import { useMemo } from "react";
 
 export default function OrderDetailPage() {
   const {
@@ -38,6 +40,25 @@ export default function OrderDetailPage() {
     handleConfirmReceipt,
     handlePayNow,
   } = useOrderDetail();
+
+  const formattedItems = order?.items.map((item) => ({
+    id: item.id,
+    name: item.product.name,
+    quantity: item.quantity,
+    price: item.priceAtPurchase,
+    imageUrl: item.product.imageUrl,
+  }));
+
+  const pricingInfo = order
+    ? {
+        subtotal: order.subtotal,
+        shippingCost: order.shippingCost,
+        discountAmount: order.discountAmount,
+        totalPrice: order.totalPrice,
+        paymentMethod: order.payment?.method,
+        shippingMethod: "JNE Express (Placeholder)",
+      }
+    : null;
 
   if (error) {
     return (
@@ -88,11 +109,34 @@ export default function OrderDetailPage() {
               {/* Unified Card for all details */}
               <Card className="rounded-2xl shadow-lg shadow-gray-200/50 border-0 p-4 sm:p-8">
                 <CardContent className="p-0 space-y-6">
-                  <OrderShippingInfo order={order} />
+                  <SharedCustomerInfoCard
+                    name={order.destinationAddress.name}
+                    phone={order.destinationAddress.phone}
+                    address={order.destinationAddress.fullAddress}
+                    variant="plain"
+                  />
                   <div className="border-t border-dashed"></div>
-                  <OrderItemsInfo items={order.items} />
+                  <div>
+                    <h3 className="text-base font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                      <ClipboardList className="w-5 h-5 text-gray-500" />
+                      Items Ordered
+                    </h3>
+                    {formattedItems && (
+                      <SharedOrderItemsCard items={formattedItems} />
+                    )}
+                  </div>
                   <div className="border-t border-dashed"></div>
-                  <OrderPricingInfo order={order} />
+                  <div>
+                    <h3 className="text-base font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                      <CreditCard className="w-5 h-5 text-gray-500" />
+                      Order Information
+                    </h3>
+                    {pricingInfo && (
+                      <div className="p-4 bg-white border border-gray-200 rounded-xl">
+                        <SharedPricingDetails pricing={pricingInfo} />
+                      </div>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
 

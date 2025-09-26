@@ -104,6 +104,24 @@ export interface OrderItemDetail {
   };
 }
 
+export interface SharedPricingInfo {
+  subtotal: string;
+  shippingCost: string;
+  discountAmount: string;
+  totalPrice: string;
+  paymentMethod?: string | null;
+  paymentStatus?: string | null;
+  shippingMethod?: string | null;
+}
+
+export interface SharedOrderItem {
+  id: number;
+  name: string;
+  quantity: number;
+  price: string;
+  imageUrl: string;
+}
+
 export interface OrderDetail {
   id: number;
   createdAt: string;
@@ -111,7 +129,11 @@ export interface OrderDetail {
   subtotal: string;
   shippingCost: string;
   discountAmount: string;
-  destinationAddress: string;
+  destinationAddress: {
+    name: string;
+    phone: string | null;
+    fullAddress: string;
+  };
   store: {
     id: number;
     name: string;
